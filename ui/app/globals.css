@@ -10,6 +10,19 @@ a {
   text-decoration-thickness: 0.05em;
 }
 
+textarea {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  /*border: 1px solid rgb(121, 142, 238);*/ /* Add this line */
+}
+
+textarea:focus {
+  outline: none;
+  border: 1px solid lightblue; /* Replace with your preferred border color */
+}
+
 a:hover {
   color: #833FFF;
   text-decoration-color: #bb96ff;

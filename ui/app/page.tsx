@@ -68,6 +68,95 @@ const Collapsible = forwardRef<HTMLDivElement, CollapsibleProps>(
   }
 );
 
+function UserObjectivesTab() {
+  const [userObjectives, setUserObjectives] = useState(''); // New state for the user objectives
+
+  const handleUserObjectivesChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setUserObjectives(event.target.value);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+      handleRunClick();
+    }
+  };
+
+
+/*   const handleRunClick = async () => { // Make the function async
+    console.log('Updating objectives');
+    const response = await fetch('/api/objectives', { // Replace '/api/objectives' with your API endpoint
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      //body: JSON.stringify({ objectives: userObjectives.split('\n') }) // Split the textarea text into lines
+      body: JSON.stringify(['objective1', 'objective2', 'objective3'])
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to update objectives');
+    }
+  };
+ */
+  const handleRunClick = async () => {
+    console.log('Updating objectives');
+    
+    // Split the userObjectives string into an array of objectives
+    // The objectives can be separated by newlines, semicolons, or "- " at the start of the objective
+    const objectives = userObjectives.split(/[\n;]|^- /).map(s => s.trim()).filter(Boolean);
+  
+    const response = await fetch('/api/objectives', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(objectives)
+    });
+      
+    if (!response.ok) {
+      console.error('Failed to update objectives');
+    }
+  };
+
+  
+  return (
+    <Collapsible
+      icon="📝"
+      title="User Objectives"
+      defaultCollapsed={false}
+    >
+      <div className="p-2" style={{ display: 'grid', gridTemplateRows: '1fr auto' }}> {/* Modify these styles */}
+        <textarea 
+          value={userObjectives} 
+          onChange={handleUserObjectivesChange} 
+          onKeyDown={handleKeyDown} 
+          placeholder="Enter your objectives here" 
+          style={{ width: '100%', minHeight: '4em' }} // Change height to minHeight and set it to 4em
+        />
+        <button 
+          onClick={handleRunClick} 
+          style={{ 
+            borderColor: '#DE82EE', 
+            borderWidth: '1px', 
+            borderStyle: 'solid', 
+            backgroundColor: '#EE82EE', // light violet color code
+            color: 'white', 
+            borderRadius: '10%', // make the button rounded
+            padding: '2px 10px',
+            marginTop: '10px', // Add some space above the button
+            alignSelf: 'end', // Align the button to the end of its grid area
+            justifySelf: 'end' // Align the button to the end of its grid area
+          }} // Style the button
+        >
+          Run
+        </button> {/* New Run button */}
+      </div>
+    </Collapsible>
+  );
+}
+
+
+
 function ObjectivesTab() {
   const { objectives, generated_objectives } = useContext(DataContext);
 
@@ -423,6 +512,7 @@ function Operation() {
       <Header />
       {/* Main */}
       <div className="flex flex-col min-h-0 flex-1 rounded-md border border-bd-1 overflow-hidden">
+        <UserObjectivesTab />
         <StatusTab />
         <ObjectivesTab />
         <ResourcesTab />

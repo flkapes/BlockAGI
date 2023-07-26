@@ -4,7 +4,7 @@ import typer
 import uvicorn
 import webbrowser
 import threading
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 from datetime import datetime
 from dataclasses import dataclass
 from fastapi import FastAPI
@@ -31,6 +31,49 @@ def get_index():
 def get_api_state():
     app.state.blockagi_state.resource_pool = app.state.resource_pool
     return app.state.blockagi_state
+
+""" @app.post("/api/objectives")
+def update_objectives(objectives: List[str]):
+    print("Updating objectives...")
+    print(objectives)
+    """ # app.state.blockagi_state.objectives = [Objective(topic=topic, expertise=0.0) for topic in objectives]
+
+@app.post("/api/objectives")
+async def update_objectives(objectives: List[str]):
+    print("Updating objectives...")
+    print(objectives)
+    # todo: add check if Objectives are handed over correctly or emppty
+    app.state.blockagi_state.objectives = [Objective(topic=topic, expertise=0.0) for topic in objectives]
+
+    if app.state.blockagi_state.processing:  # Check if processing is already in progress
+        return {"message": "Processing is already in progress"}
+
+    app.state.blockagi_state.processing = True  # Set the processing flag to True
+
+    def target(**kwargs):
+        try:
+            run_blockagi(**kwargs)
+        except Exception as e:
+            app.state.blockagi_state.add_agent_log(f"Error: {e}")
+        app.state.blockagi_state.end_time = datetime.utcnow().isoformat()
+        app.state.blockagi_state.processing = False  # Set the processing flag to False when processing is done
+
+    threading.Thread(
+        target=target,
+        kwargs=dict(
+            agent_role=app.state.blockagi_state.agent_role,
+            openai_api_key=app.state.openai_api_key,
+            openai_model=app.state.openai_model,
+            resource_pool=app.state.resource_pool,
+            objectives=app.state.blockagi_state.objectives,
+            blockagi_callback=BlockAGICallback(app.state.blockagi_state),
+            llm_callback=LLMCallback(app.state.blockagi_state),
+            iteration_count=app.state.iteration_count,
+        ),
+    ).start()
+
+
+
 
 
 app.mount("/", StaticFiles(directory="dist"), name="dist")
@@ -74,6 +117,7 @@ class BlockAGIState:
     resource_pool: ResourcePool
     llm_logs: list[LLMLog]
     narratives: list[Narrative]
+    processing: bool = False  # Add a new field to indicate whether processing is in progress
 
     def add_agent_log(self, message: str):
         self.agent_logs.append(
@@ -85,7 +129,7 @@ class BlockAGIState:
         )
 
 
-@app.on_event("startup")
+""" @app.on_event("startup")
 def on_startup():
     app.state.resource_pool = ResourcePool()
 
@@ -109,6 +153,10 @@ def on_startup():
             iteration_count=app.state.iteration_count,
         ),
     ).start()
+    webbrowser.open(f"http://{app.state.host}:{app.state.port}") """
+@app.on_event("startup")
+def on_startup():
+    app.state.resource_pool = ResourcePool()
     webbrowser.open(f"http://{app.state.host}:{app.state.port}")
 
 
