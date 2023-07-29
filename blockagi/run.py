@@ -7,8 +7,7 @@ from blockagi.tools import (
     GoogleSearchLinksTool,
     VisitWebTool,
 )
-from langchain.chat_models import ChatOpenAI
-
+from langchain.chat_models import GPT4All
 
 def run_blockagi(
     agent_role,
@@ -38,12 +37,13 @@ def run_blockagi(
             [f"{idx+1}. {t.name} - {t.description}" for idx, t in enumerate(tools)]
         )
     )
-
-    llm = ChatOpenAI(
+    
+    llm = GPT4All(
         temperature=0.8,
         streaming=True,
-        model=openai_model,
-        openai_api_key=openai_api_key,
+        n_threads=8,
+        model='./ggml-model-gpt4all-falcon-q4_0.bin',
+        #openai_api_key=openai_api_key,
         callbacks=[llm_callback],
     )  # type: ignore
 
