@@ -1,4 +1,4 @@
-import { createContext } from "react";
+import { createContext, Dispatch, SetStateAction } from "react";
 import {
   AgentState,
   AgentStatus,
@@ -44,7 +44,16 @@ export const initialData: BlockAGIDataType = {
   links: [],
 };
 
-export const DataContext = createContext<BlockAGIDataType>(initialData);
+export type DataContextType = {
+  data: BlockAGIDataType;
+  setData: Dispatch<SetStateAction<BlockAGIDataType>>;
+};
+
+//export const DataContext = createContext<BlockAGIDataType>(initialData);
+export const DataContext = createContext<DataContextType>({
+  data: initialData,
+  setData: () => {}, // Provide a no-op function as the initial setData
+});
 
 function stripCodeBlock(markdown: string) {
   // Strip out the code blocks

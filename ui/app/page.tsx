@@ -68,8 +68,27 @@ const Collapsible = forwardRef<HTMLDivElement, CollapsibleProps>(
   }
 );
 
+/* function resetApp() {
+  console.log('Resetting app');
+  fetch('/api/reset', { method: 'POST' });
+//reset UI states
+  setUserObjectives('');
+  setGeneratedObjectives([]);
+  setLinks([]);
+  setAgentLogs([]);
+  setLLMLogs([]);
+  setStatus({ round: 0, step: 'PREPARING' });
+  setIsLive(false);
+  setIsDone(false);
+} 
+ */
+
+
+
+
 function UserObjectivesTab() {
   const [userObjectives, setUserObjectives] = useState(''); // New state for the user objectives
+  const { setData } = useContext(DataContext); // Access setData from DataContext
 
   const handleUserObjectivesChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setUserObjectives(event.target.value);
@@ -82,22 +101,6 @@ function UserObjectivesTab() {
   };
 
 
-/*   const handleRunClick = async () => { // Make the function async
-    console.log('Updating objectives');
-    const response = await fetch('/api/objectives', { // Replace '/api/objectives' with your API endpoint
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      //body: JSON.stringify({ objectives: userObjectives.split('\n') }) // Split the textarea text into lines
-      body: JSON.stringify(['objective1', 'objective2', 'objective3'])
-    });
-    
-    if (!response.ok) {
-      console.error('Failed to update objectives');
-    }
-  };
- */
   const handleRunClick = async () => {
     console.log('Updating objectives');
     
@@ -105,6 +108,9 @@ function UserObjectivesTab() {
     // The objectives can be separated by newlines, semicolons, or "- " at the start of the objective
     const objectives = userObjectives.split(/[\n;]|^- /).map(s => s.trim()).filter(Boolean);
   
+  //dont need to reset here, as the reset is being handled on main.py side.
+  //setData(initialData);    // Reset the state to its initial value
+
     const response = await fetch('/api/objectives', {
       method: 'POST',
       headers: {
@@ -117,7 +123,6 @@ function UserObjectivesTab() {
       console.error('Failed to update objectives');
     }
   };
-
   
   return (
     <Collapsible
@@ -148,7 +153,7 @@ function UserObjectivesTab() {
             justifySelf: 'end' // Align the button to the end of its grid area
           }} // Style the button
         >
-          Run
+          Run!
         </button> {/* New Run button */}
       </div>
     </Collapsible>
@@ -158,7 +163,9 @@ function UserObjectivesTab() {
 
 
 function ObjectivesTab() {
-  const { objectives, generated_objectives } = useContext(DataContext);
+  //const { objectives, generated_objectives } = useContext(DataContext);
+  const { data } = useContext(DataContext);
+  const { objectives, generated_objectives } = data;
 
   const expertise =
     objectives.reduce((acc, objective) => acc + objective.expertise, 0) /
@@ -264,7 +271,9 @@ const AgentLogEntry = memo(function _AgentLogEntry({
 });
 
 function StatusTab() {
-  const { is_done, status, agent_logs } = useContext(DataContext);
+  //const { is_done, status, agent_logs } = useContext(DataContext);
+  const { data } = useContext(DataContext);
+  const { is_done, status, agent_logs } = data;
 
   return (
     <Collapsible
@@ -309,7 +318,9 @@ function StatusTab() {
 }
 
 function ResourcesTab() {
-  const { links } = useContext(DataContext);
+  //const { links } = useContext(DataContext);
+  const { data } = useContext(DataContext);
+  const { links } = data;
 
   return (
     <Collapsible
@@ -368,7 +379,9 @@ function ResourcesTab() {
 }
 
 function LLMLogTab() {
-  const { llm_logs } = useContext(DataContext);
+  //const { llm_logs } = useContext(DataContext);
+  const { data } = useContext(DataContext);
+  const { llm_logs } = data;
   const [autoscroll, setAutoscroll] = useState(true);
   const [scrollDiff, setScrollDiff] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -462,22 +475,25 @@ function LLMLogTab() {
 }
 
 function Header() {
-  const { is_live, is_done } = useContext(DataContext);
+  //const { is_live, is_done } = useContext(DataContext);
+  const { data } = useContext(DataContext);
+  const { is_live, is_done } = data;
+
   return (
     <div className="flex mt-4 mb-8">
       <div>
         <div className="flex">
           <div className="inline-flex">
             <Image
-              alt="BlockAGI Logo"
-              src="/blockagi.svg"
+              alt="Research Logo"
+              src="/ResearchLogo.svg"
               width={44}
               height={44}
             />
           </div>
           <div className="ml-4 tracking-wide">
             <div className="font-bold text-[22px] leading-7 bg-clip-text text-transparent bg-gr-1">
-              BlockAGI
+              Research Agent
             </div>
             <div className="font-bold text-[18px] text-ft-1">
               Your Self-Hosted, Hackable Research Agent
@@ -533,18 +549,18 @@ function Operation() {
           Brought to you by{" "}
           <a
             className="inline-flex ml-2 hover:text-ac-2 hover:decoration-ac-2 group"
-            href="https://blockpipe.io"
+            href="mailto:kochmartin@gmail.com"
             target="_blank"
           >
             <div className="inline-flex mr-1 group-hover:animate-spin-fast">
               <Image
-                alt="Blockpipe Logo"
-                src="/blockpipe.svg"
+                alt="Research Logo"
+                src="/ResearchLogo.svg"
                 width={18}
                 height={18}
               />
             </div>
-            Blockpipe
+            kochmartin@gmail.com
           </a>
         </div>
       </div>
@@ -615,7 +631,9 @@ const NarrativeMarkdown = memo(function _NarrativeMarkdown({
 function Narrative() {
   const [numOptions, setNumOptions] = useState(0);
   const [selectedIdx, setSelectedIdx] = useState(0);
-  const { narratives } = useContext(DataContext);
+  //const { narratives } = useContext(DataContext);
+  const { data } = useContext(DataContext);
+  const { narratives } = data;
   const narrative = narratives[selectedIdx]?.markdown || "";
 
   const [copied, setCopied] = useState(false);
@@ -691,7 +709,7 @@ function Narrative() {
   );
 }
 
-export default function Home() {
+ export default function Home() {
   const [data, setData] = useState<BlockAGIDataType>(initialData);
 
   useEffect(() => {
@@ -704,11 +722,39 @@ export default function Home() {
   }, []);
 
   return (
-    <DataContext.Provider value={data}>
+    <DataContext.Provider value={{ data, setData }}>
       <main className="flex max-h-screen min-h-screen items-stretch font-sans p-8">
         <Operation />
         <Narrative />
       </main>
     </DataContext.Provider>
   );
-}
+} 
+
+/*
+export default function Home() {
+  const [data, setData] = useState<BlockAGIDataType>(initialData);
+
+  const resetApp = () => {
+    setData(initialData);
+  };
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const newData = await fetchData();
+      if (newData) setData(newData);
+      else setData((prevData) => ({ ...prevData, is_live: false }));
+    }, 200);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <DataContext.Provider value={{ data, setData }}>
+      <button onClick={resetApp}>Reset App</button>
+      <main className="flex max-h-screen min-h-screen items-stretch font-sans p-8">
+        <Operation />
+        <Narrative />
+      </main>
+    </DataContext.Provider>
+  );
+} */

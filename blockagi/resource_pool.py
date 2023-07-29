@@ -45,3 +45,7 @@ class ResourcePool(BaseResourcePool):
 
     def get_unvisited(self) -> List[Resource]:
         return [r for r in self.resources if not r.visited]
+    
+    #clear all resources TODO: Check - this does not work. 
+    def clear(self) -> None:
+        self.resources = []

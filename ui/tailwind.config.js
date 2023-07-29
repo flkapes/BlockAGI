@@ -13,7 +13,7 @@ module.exports = {
     colors: {
       transparent: "transparent",
       "ac-1": "#833FFF",
-      "ac-2": "#0A9F19",
+      "ac-2": "#D0689D",
       "ac-3": "#767676",
       "ac-4": "#D80B30",
       "fg-1": "#EDE3FF",
